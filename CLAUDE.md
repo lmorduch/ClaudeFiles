@@ -11,15 +11,31 @@ Home gym: barbell, cable machine, dumbbells up to 55 lbs.
 
 ---
 
+## Workspace layout
+
+All work lives inside this repo (`ClaudeFiles/`). Projects are checked out under `projects/` which is gitignored — only skills, CLAUDE.md, and config are tracked here.
+
+```
+ClaudeFiles/
+  CLAUDE.md
+  skills/
+  projects/          ← gitignored; clone each project repo here
+```
+
+On a new machine: clone ClaudeFiles to a consistent path, then clone each project into `projects/`.
+
 ## Projects
 
 | Dir | What it is | Stack |
 |-----|------------|-------|
-| `WorkoutWebHelper/` | Personal workout tracker (Walrus Workout Buddy) | FastAPI + React/TS + SQLite → Railway |
-| `Todo/` | Today & Onward todo app | Node/Express + React/Vite + Postgres → Railway |
-| `Groceries/` | Grocery list app | FastAPI + React → Railway |
-| `Plants/` | Plant tracker | FastAPI + React → Railway |
-| `wizard_soccer/` | Witnessed League — Godot 4 roguelike soccer game | GDScript, no runtime in this environment |
+| `projects/WorkoutWebHelper/` | Personal workout tracker (Walrus Workout Buddy) | FastAPI + React/TS + SQLite → Railway |
+| `projects/Todo/` | Today & Onward todo app | Node/Express + React/Vite + Postgres → Railway |
+| `projects/Groceries/` | Grocery list app | FastAPI + React → Railway |
+| `projects/Plants/` | Plant tracker | FastAPI + React → Railway |
+| `projects/wizard_soccer/` | Witnessed League — Godot 4 roguelike soccer game | GDScript, no runtime in this environment |
+| `projects/Boys/` | — | — |
+| `projects/Meds/` | — | — |
+| `projects/comic-bookkeeper/` | — | — |
 
 ---
 
@@ -86,11 +102,11 @@ Commit frequently on the working branch.
 ## Context handoff docs
 
 Each project maintains its own handoff/journal files. Check these before starting work:
-- `WorkoutWebHelper/CONTINUATION.md` — architecture, data model, open tasks
-- `WorkoutWebHelper/JOURNAL.md` — session-by-session history and pending TODOs
-- `WorkoutWebHelper/HANDOFF.md` — Lucas's preferences, program state, common operations
-- `wizard_soccer/JOURNAL.md` — architecture decisions, known bugs, session log
-- `wizard_soccer/DESIGN.md` — full game design document
-- `wizard_soccer/SESSION_DECISIONS.md` — rationale for non-obvious choices
+- `projects/WorkoutWebHelper/CONTINUATION.md` — architecture, data model, open tasks
+- `projects/WorkoutWebHelper/JOURNAL.md` — session-by-session history and pending TODOs
+- `projects/WorkoutWebHelper/HANDOFF.md` — Lucas's preferences, program state, common operations
+- `projects/wizard_soccer/JOURNAL.md` — architecture decisions, known bugs, session log
+- `projects/wizard_soccer/DESIGN.md` — full game design document
+- `projects/wizard_soccer/SESSION_DECISIONS.md` — rationale for non-obvious choices
 
 Read the relevant doc before proposing anything — many "obvious" approaches have already been tried and rejected with documented reasons.

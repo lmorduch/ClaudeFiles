@@ -17,17 +17,16 @@ When invoked, execute these steps in order. Be terse — report findings, not na
 
 ## Step 1: Discover projects and check status
 
-Discover all git repos directly under `E:\Code\`:
+Discover all git repos under the `projects/` directory inside the ClaudeFiles repo. Find ClaudeFiles by locating the directory containing this skill file — it is always the repo root. Projects live at `<ClaudeFiles>/projects/`.
 
 ```powershell
-Get-ChildItem E:\Code -Directory | Where-Object { Test-Path "$($_.FullName)\.git" }
+Get-ChildItem "<ClaudeFiles>\projects" -Directory | Where-Object { Test-Path "$($_.FullName)\.git" }
 ```
 
 For each repo found, run:
 ```powershell
-cd E:\Code\<project>
-git status --short
-git log --oneline --since=midnight
+git -C "<ClaudeFiles>\projects\<project>" status --short
+git -C "<ClaudeFiles>\projects\<project>" log --oneline --since=midnight
 ```
 
 Collect: (a) which projects have uncommitted changes, (b) which projects had commits today.
@@ -84,7 +83,7 @@ Keep it brief — this is a prompt for things git can't capture: half-finished i
 
 ### 4c. Write the journal entry
 
-Append to `E:\Code\<project>\JOURNAL.md` (create if missing):
+Append to `<ClaudeFiles>/projects/<project>/JOURNAL.md` (create if missing):
 
 ```markdown
 ## Session [YYYY-MM-DD]
