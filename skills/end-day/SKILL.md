@@ -6,7 +6,7 @@ description: >
   JOURNAL.md with a dated session summary so the next session (on any machine)
   can pick up without context loss. Trigger when Lucas says "end my day",
   "wrap up", "I'm done for today", "end session", or similar.
-allowed-tools: Bash, PowerShell, Read, Edit, Write, Glob
+allowed-tools: Bash, Read, Edit, Write, Glob
 ---
 
 # End-of-Day Handoff
@@ -19,14 +19,14 @@ When invoked, execute these steps in order. Be terse — report findings, not na
 
 Discover all git repos under the `projects/` directory inside the ClaudeFiles repo. Find ClaudeFiles by locating the directory containing this skill file — it is always the repo root. Projects live at `<ClaudeFiles>/projects/`.
 
-```powershell
-Get-ChildItem "<ClaudeFiles>\projects" -Directory | Where-Object { Test-Path "$($_.FullName)\.git" }
+```bash
+for d in "<ClaudeFiles>/projects"/*/; do [ -d "$d/.git" ] && echo "$d"; done
 ```
 
 For each repo found, run:
-```powershell
-git -C "<ClaudeFiles>\projects\<project>" status --short
-git -C "<ClaudeFiles>\projects\<project>" log --oneline --since=midnight
+```bash
+git -C "<ClaudeFiles>/projects/<project>" status --short
+git -C "<ClaudeFiles>/projects/<project>" log --oneline --since=midnight
 ```
 
 Collect: (a) which projects have uncommitted changes, (b) which projects had commits today.
@@ -36,8 +36,8 @@ Collect: (a) which projects have uncommitted changes, (b) which projects had com
 ## Step 2: Pull remotes
 
 For every project that has a remote, pull the **current branch** before touching anything:
-```powershell
-git pull --rebase origin <current-branch>
+```bash
+git -C "<ClaudeFiles>/projects/<project>" pull --rebase origin <current-branch>
 ```
 
 Never pull or touch `main` — that branch is only updated via explicit merge when work is complete.
@@ -59,8 +59,8 @@ For every project with uncommitted changes:
 ## Step 4: Push all branches
 
 Push the current working branch only — never push `main` as part of this flow:
-```powershell
-git push origin <current-branch>
+```bash
+git -C "<ClaudeFiles>/projects/<project>" push origin <current-branch>
 ```
 
 Report any failures clearly (auth issues, no remote, diverged branch). If a project has no remote, note it and skip.
@@ -126,7 +126,7 @@ If anything failed (push rejected, no remote, etc.) list it clearly after the ta
 
 ## Notes
 
-- On Windows, use PowerShell for git commands.
+- Use Bash on macOS/Linux. On Windows, translate these to PowerShell equivalents.
 - Never push to a remote that doesn't exist yet — just note it.
 - Don't update JOURNAL.md if the only commit was the end-of-day checkpoint with no real work behind it.
 - If Lucas is in a hurry and says "just do it", skip the freeform notes question and proceed.

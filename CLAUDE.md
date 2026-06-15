@@ -36,6 +36,7 @@ On a new machine: clone ClaudeFiles to a consistent path, then clone each projec
 | `projects/Boys/` | — | — |
 | `projects/Meds/` | — | — |
 | `projects/comic-bookkeeper/` | — | — |
+| `projects/tattoo/` | Tattoo artist booking tracker — daily Instagram scraping + email alerts | FastAPI + React/TS + Postgres → Railway |
 
 ---
 
@@ -85,6 +86,24 @@ Ctrl+C after "Uploaded" is fine — build continues on Railway.
 - GDScript `match` is top-to-bottom — duplicate arms silently dead-code. Check for this.
 - GDScript enum aliases (e.g. `O = Wizard.Origin`) make invalid members silently resolve to 0. Always validate against the actual enum definition.
 - Editor-only wiring (Autoloads, node references in .tscn) cannot be done from code alone — flag these for Lucas to do in the editor.
+
+---
+
+## GitHub accounts
+
+Lucas has two GitHub accounts: `lmorduch` (personal) and `lmorduchowicz_hubspot` (work). The active `gh` account can drift to the HubSpot account mid-session.
+
+For all personal project git/gh operations, use:
+```bash
+gh-personal <args>   # gh CLI forced to lmorduch account
+```
+
+For git push from personal repos, set the remote URL with the username to avoid credential confusion:
+```bash
+git remote set-url origin https://lmorduch@github.com/lmorduch/<REPO>.git
+```
+
+`gh-personal` is defined in `~/.zshrc` and sets `GH_TOKEN` from the stored `lmorduch` token for the duration of each call.
 
 ---
 
