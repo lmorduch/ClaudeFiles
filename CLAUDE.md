@@ -61,17 +61,26 @@ railway service restart  # WRONG — does not rebuild, use only if image is alre
 
 Ctrl+C after "Uploaded" is fine — build continues on Railway.
 
-**WorkoutWebHelper DB sync:**
-```bash
-./db_pull.sh   # Railway → local (backs up first)
-./db_push.sh   # local → Railway + redeploy (prompts)
-```
-
 **OAuth redirect URIs** must be registered for all three: `localhost`, `192.168.50.81.nip.io` (local network), and the Railway domain. Forgetting the Railway domain is a common auth failure after first deploy.
 
 ---
 
 ## Known pitfalls
+
+### npm on HubSpot machines (affects all personal Node projects)
+
+The global `~/.npmrc` on HubSpot machines sets `registry = https://npm.hubteam.com/` and a
+`@npm` scope pointing there. This bleeds into `package-lock.json` via `resolved` URLs, which
+breaks Railway builds since `npm.hubteam.com` is internal-only.
+
+**Fix for any new Node project destined for Railway:**
+1. Add a project-level `.npmrc` with `registry=https://registry.npmjs.org/` to override.
+2. Use `npm install` (not `npm ci`) in the Railway build command — `npm ci` has an "exit handler never called" bug on Node 22 in Docker.
+3. After generating the lockfile locally, run: `sed -i '' 's|https://npm.hubteam.com/|https://registry.npmjs.org/|g' package-lock.json` to scrub any HubSpot URLs that slipped through.
+
+Also pin `"engines": { "node": ">=22" }` in `package.json` — Railway defaults to Node 18 which doesn't satisfy modern package engine requirements.
+
+---
 
 ### WorkoutWebHelper
 - **One DB rule**: only ever use `backend/workout.db`. Never set `DB_PATH=workout_railway.db` — that created a second copy and caused session confusion.
