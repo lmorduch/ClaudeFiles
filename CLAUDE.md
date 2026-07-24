@@ -52,7 +52,7 @@ No test framework in frontend (WorkoutWebHelper confirmed). No Redux.
 
 ---
 
-## Deployment
+## Railway deployment
 
 ```bash
 railway up          # CORRECT — rebuilds Docker image and deploys
@@ -61,24 +61,81 @@ railway service restart  # WRONG — does not rebuild, use only if image is alre
 
 Ctrl+C after "Uploaded" is fine — build continues on Railway.
 
-**OAuth redirect URIs** must be registered for all three: `localhost`, `192.168.50.81.nip.io` (local network), and the Railway domain. Forgetting the Railway domain is a common auth failure after first deploy.
+### Checklist for a new Node project on Railway
 
----
+**railway.toml** — always include this:
+```toml
+[build]
+builder = "nixpacks"
+buildCommand = "npm install && npm run build"
 
-## Known pitfalls
+[deploy]
+startCommand = "node server/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+
+[environments.production.variables]
+NODE_ENV = "production"
+```
+
+**package.json** — pin Node version or Railway defaults to Node 18:
+```json
+"engines": { "node": ">=22" }
+```
+
+**Healthcheck endpoint** — always add a dedicated `/health` route that returns 200. Never use `/api/me` or any auth-gated route — Railway requires 2xx and auth routes return 401, which Railway treats as unhealthy.
+```js
+app.get('/health', (_req, res) => res.json({ ok: true }))
+```
+
+**Database** — SQLite doesn't survive Railway deploys (ephemeral filesystem). Use Postgres for anything that needs to persist. Railway provisions it automatically when you add a Postgres service to the project.
+
+**DATABASE_URL** — Railway does NOT auto-inject Postgres vars into other services. In the Budget service → Variables, add:
+```
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+```
+
+**Trust proxy** — Railway terminates SSL at the load balancer, so Express sees HTTP internally. Without this, `express-session` with `secure: true` never sets the cookie and sessions don't persist after OAuth. Add before any middleware:
+```js
+app.set('trust proxy', 1)
+```
+
+**Google OAuth env vars** needed at deploy time:
+```
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_CALLBACK_URL=https://<railway-domain>/auth/google/callback
+ALLOWED_EMAILS=email1@gmail.com,email2@gmail.com
+SESSION_SECRET=<openssl rand -hex 32>
+```
+OAuth redirect URIs must be registered in Google Cloud Console for the Railway domain. Forgetting this is a common auth failure on first deploy.
 
 ### npm on HubSpot machines (affects all personal Node projects)
 
-The global `~/.npmrc` on HubSpot machines sets `registry = https://npm.hubteam.com/` and a
-`@npm` scope pointing there. This bleeds into `package-lock.json` via `resolved` URLs, which
-breaks Railway builds since `npm.hubteam.com` is internal-only.
+The global `~/.npmrc` sets `registry = https://npm.hubteam.com/` which bleeds into
+`package-lock.json` via `resolved` URLs. Railway can't reach `npm.hubteam.com`.
 
-**Fix for any new Node project destined for Railway:**
-1. Add a project-level `.npmrc` with `registry=https://registry.npmjs.org/` to override.
-2. Use `npm install` (not `npm ci`) in the Railway build command — `npm ci` has an "exit handler never called" bug on Node 22 in Docker.
-3. After generating the lockfile locally, run: `sed -i '' 's|https://npm.hubteam.com/|https://registry.npmjs.org/|g' package-lock.json` to scrub any HubSpot URLs that slipped through.
+**Fix for every new Node project:**
+1. Add a project-level `.npmrc`: `registry=https://registry.npmjs.org/`
+2. Use `npm install` in `buildCommand`, not `npm ci` — `npm ci` has an "exit handler never called" bug on Node 22 in Docker
+3. After generating the lockfile locally: `sed -i '' 's|https://npm.hubteam.com/|https://registry.npmjs.org/|g' package-lock.json`
 
-Also pin `"engines": { "node": ">=22" }` in `package.json` — Railway defaults to Node 18 which doesn't satisfy modern package engine requirements.
+### Express 5 breaking changes
+
+- Wildcard routes: `'*'` is invalid — use `'/{*path}'` instead
+- Async route handlers propagate thrown errors automatically (no need for try/catch + next(err))
+
+### Scrubbing sensitive data from git history
+
+```bash
+pip3 install git-filter-repo --break-system-packages
+git filter-repo --path <FILE> --invert-paths --force
+# filter-repo removes the remote; re-add it after:
+git remote add origin git@github.com:lmorduch/<REPO>.git
+```
+
+Always gitignore JOURNAL.md and any file with real financial/personal data before pushing to a remote.
 
 ---
 
