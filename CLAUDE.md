@@ -30,6 +30,7 @@ On a new machine: clone ClaudeFiles to a consistent path, then clone each projec
 |-----|------------|-------|
 | `projects/WorkoutWebHelper/` | Personal workout tracker (Walrus Workout Buddy) | FastAPI + React/TS + SQLite → Railway |
 | `projects/Todo/` | Today & Onward todo app | Node/Express + React/Vite + Postgres → Railway |
+| `projects/Budget/` | Household budget tracker (shared with Wayo) | Node/Express + React/TS/Vite + Tailwind + Postgres + Plaid → Railway. Default branch is `master`, not `main`. |
 | `projects/Groceries/` | Grocery list app | FastAPI + React → Railway |
 | `projects/Plants/` | Plant tracker | FastAPI + React → Railway |
 | `projects/wizard_soccer/` | Witnessed League — Godot 4 roguelike soccer game | GDScript, no runtime in this environment |
@@ -54,6 +55,9 @@ No test framework in frontend (WorkoutWebHelper confirmed). No Redux.
 
 ## Railway deployment
 
+**Check first whether the project is GitHub-integrated** (Budget, WorkoutWebHelper) — for those, pushing the deploy branch is the whole deploy and `railway up` is wrong. See Branching + deploy below.
+
+For the rest:
 ```bash
 railway up          # CORRECT — rebuilds Docker image and deploys
 railway service restart  # WRONG — does not rebuild, use only if image is already current
@@ -178,7 +182,10 @@ git remote set-url origin https://lmorduch@github.com/lmorduch/<REPO>.git
 - All work happens on a branch. Never commit directly to `main`.
 - `main` is the deploy branch for every project. Only merge into it when a feature/fix is complete and ready to ship.
 - Branch naming: `wip/<short-description>` for ongoing work, `fix/<short-description>` for bugfixes.
-- Deploy is `railway up` from local filesystem (not triggered by git push).
+- Deploy is `railway up` from local filesystem (not triggered by git push) — for most projects.
+- **Exceptions — GitHub-integrated, the push IS the deploy (no `railway up`):**
+  - **Budget** tracks `master` — `git push origin master` builds and releases to production.
+  - **WorkoutWebHelper** tracks `main` — `git push origin main` builds and releases to production.
 
 Commit frequently on the working branch.
 
