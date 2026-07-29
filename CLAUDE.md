@@ -38,6 +38,7 @@ On a new machine: clone ClaudeFiles to a consistent path, then clone each projec
 | `projects/Meds/` | — | — |
 | `projects/comic-bookkeeper/` | — | — |
 | `projects/tattoo/` | Tattoo artist booking tracker — daily Instagram scraping + email alerts | FastAPI + React/TS + Postgres → Railway |
+| `projects/Sourced/` | Reverse image product search — image in, ranked listings + markup spread out | FastAPI + React/TS, no DB, SerpApi Google Lens → Railway |
 
 ---
 
@@ -144,12 +145,14 @@ Always gitignore JOURNAL.md and any file with real financial/personal data befor
 ---
 
 ### WorkoutWebHelper
-- **One DB rule**: only ever use `backend/workout.db`. Never set `DB_PATH=workout_railway.db` — that created a second copy and caused session confusion.
+- **Never hand-edit prod data.** No direct DB, no startup-hack backfills. Prod lives on the Railway volume at `/data/workout.db`; the local `backend/workout.db` is a dead path and `railway run` executes locally so it can't reach prod. Use the API.
 - **ExerciseDB API**: `gifUrl` field was removed. Use `/image?exerciseId=X` endpoint instead.
 - **Seeding**: seed scripts skip if the program name exists. To force re-seed: `DELETE FROM programs WHERE name='...';` first.
 - **Wrong workout day bug (fixed)**: was using a hardcoded `DAY_TO_WORKOUT` map. Always pass `workout.workout_day` explicitly — don't derive from day-of-week.
 - **Feedback button**: no GitHub repo exists publicly. Use in-app feedback modal → `POST /api/feedback` → `feedback` table.
-- Active program: Zing Coach (program_run_id=2, start_date=2026-06-01). Lucas uses Cable Curls not Barbell Bicep Curls, and Cable Tricep Pushdowns not Dips.
+- Active program: **Upper·Lower·Push·Pull·Legs+Arms** (program id=6, run id=3, started 2026-06-17). Confirm with `GET /api/program-runs/active` before analysing — the older "5-Day ULPPL" (id=5) still exists as a template and is not what he runs.
+- Lucas uses Cable Curls not Barbell Bicep Curls, and Cable Tricep Pushdowns not Dips (wrist issues).
+- Scriptable via `X-Admin-Token` header + the `mcp_server/` MCP tools — no browser needed.
 
 ### Godot (wizard_soccer)
 - No local Godot binary. Code is syntax-reviewed, not runtime-verified. Say so explicitly.
